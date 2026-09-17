@@ -13,6 +13,7 @@
 elo_tournament.db
 
 # Virtual environment
+.venv
 .venv/
 venv/
 ENV/
