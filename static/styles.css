@@ -210,6 +210,97 @@ body {
   margin-bottom: 20px;
 }
 
+/* BYOK (Bring Your Own Key) Row */
+.byok-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+}
+
+.byok-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.byok-input-wrap {
+  display: flex;
+  align-items: center;
+  background: rgba(11, 16, 26, 0.95);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.byok-input-wrap:focus-within {
+  border-color: var(--cyan);
+  box-shadow: 0 0 14px rgba(0, 242, 254, 0.3);
+}
+
+.byok-icon {
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+.byok-input {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+  width: 100%;
+}
+
+.byok-input::placeholder {
+  color: var(--text-dim);
+  font-family: var(--font-main);
+}
+
+.byok-toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.byok-toggle:hover {
+  opacity: 1;
+}
+
+.byok-note {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.history-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.history-checkbox input[type="checkbox"] {
+  accent-color: var(--cyan);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 .control-row {
   display: flex;
   align-items: center;

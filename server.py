@@ -74,7 +74,8 @@ class StartTournamentRequest(BaseModel):
     concurrency: int = 8
     rounds: int = 6
     threshold: float = 0.4
-    reset_db: bool = True
+    reset_db: bool = False  # Keep history by default!
+    api_key: Optional[str] = None
 
 @app.get("/api/datasets")
 async def list_datasets():
@@ -101,12 +102,21 @@ async def get_status():
         "is_running": current_tournament_state["is_running"],
         "dataset": current_tournament_state["dataset"],
         "stats": db.get_tournament_stats(),
-        "leaderboard": db.get_leaderboard(limit=15)
+        "leaderboard": db.get_leaderboard(limit=25),
+        "recent_matches": db.get_match_history(limit=30)
     }
 
 async def _run_tournament_job(req: StartTournamentRequest):
     global current_tournament_state
     try:
+        # Determine API key: prefer user-supplied key, fallback to server environment
+        api_key = (req.api_key or "").strip() or os.getenv("TYPESAFE_API_KEY", "")
+        if not api_key:
+            await manager.broadcast("tournament_error", {
+                "error": "No TypeSafe API Key provided. Please enter your Jev API key in the dashboard."
+            })
+            return
+
         current_tournament_state["is_running"] = True
         current_tournament_state["dataset"] = req.dataset
 
@@ -115,7 +125,7 @@ async def _run_tournament_job(req: StartTournamentRequest):
         instructions, criteria = get_domain_prompt_and_criteria(dataset_name)
 
         config = Config(
-            api_key=os.getenv("TYPESAFE_API_KEY", ""),
+            api_key=api_key,
             model=os.getenv("TYPESAFE_MODEL", "jev-latest"),
             db_path="elo_tournament.db",
             concurrency=req.concurrency,
@@ -182,14 +192,15 @@ async def stop_tournament():
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     db = Database(os.getenv("ELO_DB_PATH", "elo_tournament.db"))
-    # Send initial state
+    # Send initial state with past match history and leaderboard
     await websocket.send_text(json.dumps({
         "type": "init",
         "data": {
             "is_running": current_tournament_state["is_running"],
             "dataset": current_tournament_state["dataset"],
             "stats": db.get_tournament_stats(),
-            "leaderboard": db.get_leaderboard(limit=15)
+            "leaderboard": db.get_leaderboard(limit=50),
+            "recent_matches": db.get_match_history(limit=35)
         }
     }))
     try:

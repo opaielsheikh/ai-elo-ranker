@@ -59,23 +59,43 @@
     <section class="arena-section">
       <!-- Controls Card -->
       <div class="glass-card controls-card">
+        <!-- BYOK Row (Bring Your Own Key) -->
+        <div class="byok-row">
+          <div class="byok-input-group">
+            <div class="byok-input-wrap">
+              <span class="byok-icon">🔑</span>
+              <input type="password" id="inputApiKey" class="byok-input" placeholder="Enter your Jev / TypeSafe API Key (apikey_...)" autocomplete="off">
+              <button type="button" id="btnToggleKey" class="byok-toggle" title="Show / Hide Key">👁</button>
+            </div>
+            <span class="byok-note">Client-side only • Never stored on server</span>
+          </div>
+
+          <label class="history-checkbox" title="Unchecked = keep past match history and continue ranking">
+            <input type="checkbox" id="chkResetDb">
+            <span class="checkbox-custom"></span>
+            <span>Reset Past Results</span>
+          </label>
+        </div>
+
         <div class="control-row">
           <div class="control-group">
             <label for="datasetSelect">Dataset</label>
             <select id="datasetSelect" class="custom-select">
+              <option value="famous_poems_10k.json">📚 Famous Poems (10,000)</option>
+              <option value="curator_cycle.json">📜 The Curator's Cycle (17)</option>
               <option value="startup_pitches.json">🚀 Startup Pitches (12)</option>
-              <option value="poems.json">📜 Famous Poems (12)</option>
+              <option value="poems.json">✒️ Classic Poems (14)</option>
             </select>
           </div>
 
           <div class="control-group">
             <label for="concurrencyRange">Workers: <span id="concurrencyVal" class="val-badge">8</span></label>
-            <input type="range" id="concurrencyRange" min="2" max="16" value="8" step="1">
+            <input type="range" id="concurrencyRange" min="2" max="20" value="8" step="1">
           </div>
 
           <div class="control-group">
             <label for="roundsRange">Rounds: <span id="roundsVal" class="val-badge">6</span></label>
-            <input type="range" id="roundsRange" min="3" max="12" value="6" step="1">
+            <input type="range" id="roundsRange" min="2" max="15" value="6" step="1">
           </div>
 
           <div class="control-actions">

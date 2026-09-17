@@ -15,6 +15,11 @@ const metricSpeed = document.getElementById("metricSpeed");
 const metricLatency = document.getElementById("metricLatency");
 const metricShift = document.getElementById("metricShift");
 
+// BYOK Elements
+const inputApiKey = document.getElementById("inputApiKey");
+const btnToggleKey = document.getElementById("btnToggleKey");
+const chkResetDb = document.getElementById("chkResetDb");
+
 const datasetSelect = document.getElementById("datasetSelect");
 const concurrencyRange = document.getElementById("concurrencyRange");
 const concurrencyVal = document.getElementById("concurrencyVal");
@@ -100,6 +105,29 @@ btnSound.addEventListener("click", () => {
   btnSound.textContent = soundEnabled ? "🔊" : "🔇";
 });
 
+// BYOK Key Management
+if (inputApiKey) {
+  const savedKey = localStorage.getItem("jev_api_key") || "";
+  inputApiKey.value = savedKey;
+
+  inputApiKey.addEventListener("input", (e) => {
+    localStorage.setItem("jev_api_key", e.target.value.trim());
+    inputApiKey.style.borderColor = "";
+  });
+}
+
+if (btnToggleKey && inputApiKey) {
+  btnToggleKey.addEventListener("click", () => {
+    if (inputApiKey.type === "password") {
+      inputApiKey.type = "text";
+      btnToggleKey.textContent = "🔒";
+    } else {
+      inputApiKey.type = "password";
+      btnToggleKey.textContent = "👁";
+    }
+  });
+}
+
 // Load available datasets
 async function loadDatasets() {
   try {
@@ -110,7 +138,7 @@ async function loadDatasets() {
       json.datasets.forEach((ds) => {
         const opt = document.createElement("option");
         opt.value = ds.filename;
-        opt.textContent = `${ds.name} (${ds.count} items)`;
+        opt.textContent = `${ds.name} (${ds.count.toLocaleString()} items)`;
         datasetSelect.appendChild(opt);
       });
     }
@@ -147,9 +175,50 @@ function connectWebSocket() {
 function handleServerEvent(type, data) {
   switch (type) {
     case "init":
-      if (data.leaderboard) {
+      // Populate past statistics and history immediately
+      if (data.stats && data.stats.total_matches !== undefined) {
+        totalMatchesCounter = data.stats.total_matches;
+        metricMatches.textContent = totalMatchesCounter.toLocaleString();
+        if (data.stats.avg_latency_ms) {
+          metricLatency.innerHTML = `${Math.round(data.stats.avg_latency_ms)} <span class="metric-unit">ms</span>`;
+        }
+      }
+
+      // Populate past match history
+      if (data.recent_matches && data.recent_matches.length > 0) {
+        feedList.innerHTML = "";
+        data.recent_matches.forEach((m) => {
+          const itemEl = document.createElement("div");
+          itemEl.className = "feed-item";
+          const isWinnerA = m.winner_id === m.item_a_id;
+          const winnerTitle = isWinnerA ? m.item_a_title : m.item_b_title;
+          const loserTitle = isWinnerA ? m.item_b_title : m.item_a_title;
+          const winDelta = isWinnerA ? m.delta_a : m.delta_b;
+
+          itemEl.innerHTML = `
+            <div class="feed-left">
+              <span class="feed-tag">#${m.id}</span>
+              <span class="feed-winner">${winnerTitle || "Winner"}</span>
+              <span style="color:var(--text-dim)">def.</span>
+              <span style="color:var(--text-muted)">${loserTitle || "Opponent"}</span>
+              <span class="feed-reason">"${m.reason || "Decisive victory"}"</span>
+            </div>
+            <div class="feed-right">
+              <span style="color:var(--green)">+${Math.abs(winDelta || 0).toFixed(1)}</span>
+              <span style="color:var(--text-dim)">|</span>
+              <span>${Math.round(m.latency_ms || 0)}ms</span>
+            </div>
+          `;
+          feedList.appendChild(itemEl);
+        });
+        feedCounter.textContent = `${totalMatchesCounter.toLocaleString()} matches in history`;
+      }
+
+      // Populate historical leaderboard
+      if (data.leaderboard && data.leaderboard.length > 0) {
         renderLeaderboard(data.leaderboard);
       }
+
       if (data.is_running) {
         setRunningState(true);
       }
@@ -345,12 +414,16 @@ function setRunningState(running) {
 // Start tournament button action
 btnStart.addEventListener("click", async () => {
   try {
+    const keyVal = inputApiKey ? inputApiKey.value.trim() : "";
+    const resetDbVal = chkResetDb ? chkResetDb.checked : false;
+
     const payload = {
       dataset: datasetSelect.value,
       concurrency: parseInt(concurrencyRange.value),
       rounds: parseInt(roundsRange.value),
       threshold: 0.4,
-      reset_db: true
+      reset_db: resetDbVal,
+      api_key: keyVal || undefined
     };
 
     const res = await fetch("/api/tournament/start", {
@@ -361,7 +434,13 @@ btnStart.addEventListener("click", async () => {
 
     if (!res.ok) {
       const err = await res.json();
-      alert(`Error starting tournament: ${err.error || "Unknown"}`);
+      if (err.error && err.error.toLowerCase().includes("key")) {
+        if (inputApiKey) {
+          inputApiKey.focus();
+          inputApiKey.style.borderColor = "var(--red)";
+        }
+      }
+      alert(`Tournament Error: ${err.error || "Could not start tournament"}`);
     }
   } catch (err) {
     console.error("Start failed:", err);
