@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ AI Elo Ranker | Real-Time LLM Tournament</title>
+  <meta name="description" content="Recursive head-to-head text rankings powered by Jev Ultra-Fast LLM and Swiss-system matchmaking.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-mark">⚡</div>
+      <div>
+        <h1 class="app-title">AI ELO RANKER</h1>
+        <p class="app-subtitle">Recursive Pairwise Tournament powered by <strong>Jev System One</strong></p>
+      </div>
+    </div>
+
+    <div class="header-status">
+      <span class="status-indicator" id="statusDot"></span>
+      <span id="statusText">System Ready</span>
+    </div>
+  </header>
+
+  <!-- Metrics Bar -->
+  <section class="metrics-bar">
+    <div class="metric-card">
+      <span class="metric-label">TOTAL MATCHES</span>
+      <div class="metric-value" id="metricMatches">0</div>
+      <span class="metric-sub" id="metricRounds">Round 0</span>
+    </div>
+    <div class="metric-card">
+      <span class="metric-label">THROUGHPUT</span>
+      <div class="metric-value" id="metricSpeed">0.0 <span class="metric-unit">m/s</span></div>
+      <span class="metric-sub">Parallel evaluations</span>
+    </div>
+    <div class="metric-card">
+      <span class="metric-label">AVG MODEL LATENCY</span>
+      <div class="metric-value" id="metricLatency">0 <span class="metric-unit">ms</span></div>
+      <span class="metric-sub" id="metricModel">jev-latest</span>
+    </div>
+    <div class="metric-card">
+      <span class="metric-label">CONVERGENCE SHIFT</span>
+      <div class="metric-value" id="metricShift">--</div>
+      <span class="metric-sub" id="metricStability">Target: &le; 0.40</span>
+    </div>
+  </section>
+
+  <!-- Main Container -->
+  <main class="main-layout">
+    <!-- Left: Battle Arena & Controls -->
+    <section class="arena-section">
+      <!-- Controls Card -->
+      <div class="glass-card controls-card">
+        <div class="control-row">
+          <div class="control-group">
+            <label for="datasetSelect">Dataset</label>
+            <select id="datasetSelect" class="custom-select">
+              <option value="startup_pitches.json">🚀 Startup Pitches (12)</option>
+              <option value="poems.json">📜 Famous Poems (12)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="concurrencyRange">Workers: <span id="concurrencyVal" class="val-badge">8</span></label>
+            <input type="range" id="concurrencyRange" min="2" max="16" value="8" step="1">
+          </div>
+
+          <div class="control-group">
+            <label for="roundsRange">Rounds: <span id="roundsVal" class="val-badge">6</span></label>
+            <input type="range" id="roundsRange" min="3" max="12" value="6" step="1">
+          </div>
+
+          <div class="control-actions">
+            <button id="btnStart" class="btn btn-primary">
+              <span class="btn-icon">⚡</span> START TOURNAMENT
+            </button>
+            <button id="btnSound" class="btn btn-icon-only" title="Toggle Sound">
+              🔊
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Duel Arena -->
+      <div class="glass-card arena-card">
+        <div class="arena-header">
+          <span class="badge badge-neon" id="arenaRoundBadge">ROUND 1</span>
+          <span class="arena-title">LIVE HEAD-TO-HEAD DUEL</span>
+          <span class="badge badge-dim" id="arenaMatchBadge">MATCH #0</span>
+        </div>
+
+        <div class="duel-stage" id="duelStage">
+          <!-- Candidate A -->
+          <div class="candidate-card" id="cardA">
+            <div class="candidate-header">
+              <span class="cand-tag">CANDIDATE A</span>
+              <span class="cand-elo" id="cardAElo">1200.0</span>
+            </div>
+            <h3 class="cand-title" id="cardATitle">Select a dataset and start</h3>
+            <p class="cand-content" id="cardAContent">Each candidate is evaluated in parallel using Swiss-system pairing to maximize informational gain...</p>
+            <div class="delta-bubble" id="cardADelta"></div>
+          </div>
+
+          <!-- VS Badge & Rationale -->
+          <div class="vs-container">
+            <div class="vs-orb" id="vsOrb">VS</div>
+            <div class="vs-latency" id="vsLatency">--- ms</div>
+          </div>
+
+          <!-- Candidate B -->
+          <div class="candidate-card" id="cardB">
+            <div class="candidate-header">
+              <span class="cand-tag">CANDIDATE B</span>
+              <span class="cand-elo" id="cardBElo">1200.0</span>
+            </div>
+            <h3 class="cand-title" id="cardBTitle">Ready for battle</h3>
+            <p class="cand-content" id="cardBContent">Matches with equal win probabilities provide ~1 bit of entropy reduction, driving rapid leaderboard convergence.</p>
+            <div class="delta-bubble" id="cardBDelta"></div>
+          </div>
+        </div>
+
+        <!-- AI Verdict Banner -->
+        <div class="verdict-banner" id="verdictBanner">
+          <div class="verdict-icon">🏆</div>
+          <div class="verdict-info">
+            <div class="verdict-winner" id="verdictWinner">Awaiting match...</div>
+            <div class="verdict-reason" id="verdictReason">Model rationale will appear here after evaluation</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Duel Feed / Ticker -->
+      <div class="glass-card feed-card">
+        <div class="feed-header">
+          <span>⚡ REAL-TIME MATCH STREAM</span>
+          <span class="badge badge-dim" id="feedCounter">0 matches resolved</span>
+        </div>
+        <div class="feed-list" id="feedList">
+          <div class="feed-empty">No duels recorded yet. Click "Start Tournament" to initiate recursive rankings.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Definitive Leaderboard -->
+    <aside class="leaderboard-section">
+      <div class="glass-card leaderboard-card">
+        <div class="board-header">
+          <div class="board-title-group">
+            <span class="board-trophy">🏆</span>
+            <div>
+              <h2 class="board-title">DEFINITIVE LEADERBOARD</h2>
+              <p class="board-subtitle">Live Elo rating sorted in real time</p>
+            </div>
+          </div>
+          <span class="badge badge-cyan" id="boardItemsCount">12 Items</span>
+        </div>
+
+        <div class="leaderboard-list" id="leaderboardList">
+          <!-- Rows will be injected by JavaScript -->
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

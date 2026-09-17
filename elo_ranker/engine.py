@@ -1,6 +1,6 @@
 import asyncio
 import time
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Callable, Awaitable
 
 from .config import Config
 from .db import Database
@@ -16,7 +16,8 @@ class TournamentEngine:
         db: Optional[Database] = None,
         judge: Optional[JevJudge] = None,
         matchmaker: Optional[SwissMatchmaker] = None,
-        reporter: Optional[TerminalReporter] = None
+        reporter: Optional[TerminalReporter] = None,
+        event_callback: Optional[Callable[[str, Dict[str, Any]], Awaitable[None]]] = None
     ):
         self.config = config
         self.db = db or Database(config.db_path)
@@ -27,8 +28,18 @@ class TournamentEngine:
             max_rounds=config.max_rounds
         )
         self.reporter = reporter or TerminalReporter()
+        self.event_callback = event_callback
         self.semaphore = asyncio.Semaphore(config.concurrency)
         self.match_counter = 0
+
+    async def _emit(self, event_type: str, data: Dict[str, Any]) -> None:
+        if self.event_callback:
+            try:
+                res = self.event_callback(event_type, data)
+                if asyncio.iscoroutine(res):
+                    await res
+            except Exception:
+                pass
 
     async def _execute_single_match(
         self,
@@ -98,6 +109,34 @@ class TournamentEngine:
                 latency_ms=result.latency_ms
             )
 
+            # Broadcast event to WebSockets
+            await self._emit("match_complete", {
+                "match_idx": current_match_idx,
+                "round_num": round_num,
+                "item_a": {
+                    "id": str(item_a["id"]),
+                    "title": item_a.get("title", "Item A"),
+                    "content": item_a.get("content", ""),
+                    "elo_before": ra_before,
+                    "elo_after": ra_after,
+                    "delta": delta_a
+                },
+                "item_b": {
+                    "id": str(item_b["id"]),
+                    "title": item_b.get("title", "Item B"),
+                    "content": item_b.get("content", ""),
+                    "elo_before": rb_before,
+                    "elo_after": rb_after,
+                    "delta": delta_b
+                },
+                "winner_id": winner_id,
+                "winner_title": item_a.get("title") if winner_id == str(item_a["id"]) else item_b.get("title"),
+                "reason": result.reason,
+                "confidence": result.confidence,
+                "latency_ms": result.latency_ms,
+                "current_leaderboard": self.db.get_leaderboard(limit=12)
+            })
+
             return {
                 "match_id": current_match_idx,
                 "winner_id": winner_id,
@@ -142,11 +181,25 @@ class TournamentEngine:
             concurrency=self.config.concurrency
         )
 
+        await self._emit("tournament_start", {
+            "dataset_name": dataset_name,
+            "item_count": len(initial_items),
+            "model": self.config.model,
+            "concurrency": self.config.concurrency,
+            "max_rounds": self.config.max_rounds,
+            "initial_leaderboard": self.db.get_leaderboard(limit=12)
+        })
+
         start_time = time.perf_counter()
         round_num = 1
 
         async with self.judge:
             while round_num <= self.config.max_rounds:
+                await self._emit("round_start", {
+                    "round_num": round_num,
+                    "max_rounds": self.config.max_rounds
+                })
+
                 matches_played = await self.run_round(round_num)
                 if matches_played == 0:
                     break
@@ -159,6 +212,15 @@ class TournamentEngine:
 
                 self.reporter.print_round_summary(round_num, matches_played, avg_shift, status_msg)
                 self.reporter.print_leaderboard(current_items, title=f"LEADERBOARD AFTER ROUND {round_num}", limit=8)
+
+                await self._emit("round_complete", {
+                    "round_num": round_num,
+                    "matches_played": matches_played,
+                    "avg_shift": avg_shift,
+                    "is_converged": is_converged,
+                    "status_msg": status_msg,
+                    "leaderboard": self.db.get_leaderboard(limit=15)
+                })
 
                 if is_converged:
                     print(f"\n🎯 [CONVERGENCE ACHIEVED] {status_msg}\n")
@@ -181,4 +243,13 @@ class TournamentEngine:
         print("=" * 80)
 
         self.reporter.print_leaderboard(final_items, title="🏆 FINAL DEFINITIVE ELO RANKINGS", limit=15)
+
+        await self._emit("tournament_complete", {
+            "total_matches": stats["total_matches"],
+            "total_time": round(total_time, 2),
+            "matches_per_sec": round(matches_per_sec, 1),
+            "avg_latency_ms": stats["avg_latency_ms"],
+            "final_leaderboard": self.db.get_leaderboard(limit=20)
+        })
+
         return final_items
