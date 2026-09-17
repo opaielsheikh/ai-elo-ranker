@@ -279,9 +279,36 @@ body {
   opacity: 1;
 }
 
-.byok-note {
-  font-size: 11px;
+.byok-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3px;
+}
+
+.key-status-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
   color: var(--text-dim);
+  transition: all 0.3s;
+  letter-spacing: 0.5px;
+}
+
+.key-status-pill.active {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--green);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+.key-status-pill.missing {
+  background: rgba(244, 63, 94, 0.15);
+  color: var(--red);
+  border: 1px solid rgba(244, 63, 94, 0.35);
 }
 
 .history-checkbox {
@@ -465,6 +492,7 @@ input[type="range"] {
   position: relative;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 220px;
 }
 
 .candidate-card.winner {
@@ -508,12 +536,12 @@ input[type="range"] {
 
 .cand-content {
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--text-muted);
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  white-space: pre-line; /* Preserves poetry lines and stanzas */
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
 /* Floating Delta Bubble */
@@ -845,22 +873,60 @@ input[type="range"] {
   color: var(--text-dim);
 }
 
+/* Leaderboard Search */
+.board-search-wrap {
+  display: flex;
+  align-items: center;
+  background: rgba(11, 16, 26, 0.85);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.board-search-wrap:focus-within {
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0, 242, 254, 0.25);
+}
+
+.search-icon {
+  font-size: 12px;
+  margin-right: 8px;
+  opacity: 0.7;
+}
+
+#boardSearchInput {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-family: var(--font-main);
+  font-size: 12px;
+  width: 100%;
+  outline: none;
+}
+
+#boardSearchInput::placeholder {
+  color: var(--text-dim);
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
 }
 
-/* Responsive */
+/* Responsive Adaptations */
 @media (max-width: 1080px) {
   .main-layout {
     grid-template-columns: 1fr;
@@ -869,3 +935,58 @@ input[type="range"] {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 14px 18px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .metrics-bar {
+    grid-template-columns: 1fr 1fr;
+    padding: 12px 18px;
+    gap: 10px;
+  }
+  .metric-card {
+    padding: 12px 14px;
+  }
+  .metric-value {
+    font-size: 20px;
+  }
+  .main-layout {
+    padding: 0 14px 24px;
+    gap: 16px;
+  }
+  .duel-stage {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .vs-container {
+    flex-direction: row;
+    justify-content: center;
+  }
+  .control-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .control-actions {
+    margin-left: 0;
+    width: 100%;
+    display: flex;
+  }
+  .btn-primary {
+    flex: 1;
+    justify-content: center;
+  }
+  .byok-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .feed-card {
+    max-height: 220px;
+  }
+}
+

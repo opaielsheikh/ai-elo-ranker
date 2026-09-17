@@ -67,13 +67,16 @@
               <input type="password" id="inputApiKey" class="byok-input" placeholder="Enter your Jev / TypeSafe API Key (apikey_...)" autocomplete="off">
               <button type="button" id="btnToggleKey" class="byok-toggle" title="Show / Hide Key">👁</button>
             </div>
-            <span class="byok-note">Client-side only • Never stored on server</span>
+            <div class="byok-meta">
+              <span class="byok-note">Client-side only • Never stored on server</span>
+              <span class="key-status-pill" id="keyStatusPill">No Key Set</span>
+            </div>
           </div>
 
           <label class="history-checkbox" title="Unchecked = keep past match history and continue ranking">
             <input type="checkbox" id="chkResetDb">
             <span class="checkbox-custom"></span>
-            <span>Reset Past Results</span>
+            <span>Reset History</span>
           </label>
         </div>
 
@@ -180,7 +183,12 @@
               <p class="board-subtitle">Live Elo rating sorted in real time</p>
             </div>
           </div>
-          <span class="badge badge-cyan" id="boardItemsCount">12 Items</span>
+          <span class="badge badge-cyan" id="boardItemsCount">10,000 Items</span>
+        </div>
+
+        <div class="board-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="boardSearchInput" placeholder="Filter poems, authors (e.g. Baudelaire, Curator, Dickinson)..." autocomplete="off">
         </div>
 
         <div class="leaderboard-list" id="leaderboardList">

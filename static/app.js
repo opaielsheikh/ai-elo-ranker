@@ -105,14 +105,28 @@ btnSound.addEventListener("click", () => {
   btnSound.textContent = soundEnabled ? "🔊" : "🔇";
 });
 
+function updateKeyStatus() {
+  if (!keyStatusPill || !inputApiKey) return;
+  const val = inputApiKey.value.trim();
+  if (val.length >= 8) {
+    keyStatusPill.className = "key-status-pill active";
+    keyStatusPill.textContent = "✓ Key Active";
+    inputApiKey.style.borderColor = "";
+  } else {
+    keyStatusPill.className = "key-status-pill missing";
+    keyStatusPill.textContent = "No Key Set";
+  }
+}
+
 // BYOK Key Management
 if (inputApiKey) {
   const savedKey = localStorage.getItem("jev_api_key") || "";
   inputApiKey.value = savedKey;
+  updateKeyStatus();
 
   inputApiKey.addEventListener("input", (e) => {
     localStorage.setItem("jev_api_key", e.target.value.trim());
-    inputApiKey.style.borderColor = "";
+    updateKeyStatus();
   });
 }
 
@@ -125,6 +139,13 @@ if (btnToggleKey && inputApiKey) {
       inputApiKey.type = "password";
       btnToggleKey.textContent = "👁";
     }
+  });
+}
+
+// Search Filter Listener
+if (boardSearchInput) {
+  boardSearchInput.addEventListener("input", () => {
+    renderLeaderboard(currentLeaderboardData);
   });
 }
 
@@ -362,22 +383,63 @@ function appendFeedItem(data) {
   feedCounter.textContent = `${totalMatchesCounter} matches resolved`;
 }
 
-// Render the definitive leaderboard
+// Render the definitive leaderboard with search filter support
 function renderLeaderboard(items) {
-  if (!items || items.length === 0) return;
+  if (items && items.length > 0) {
+    currentLeaderboardData = items;
+  }
+  const pool = currentLeaderboardData || [];
+  if (pool.length === 0) return;
 
-  boardItemsCount.textContent = `${items.length} Items`;
+  const query = boardSearchInput ? boardSearchInput.value.toLowerCase().trim() : "";
+  let filtered = pool;
+  if (query) {
+    filtered = pool.filter((item) => {
+      const title = (item.title || "").toLowerCase();
+      let author = "";
+      try {
+        if (typeof item.metadata === "string") {
+          const meta = JSON.parse(item.metadata);
+          author = (meta.author || "").toLowerCase();
+        } else if (item.metadata) {
+          author = (item.metadata.author || "").toLowerCase();
+        }
+      } catch (e) {}
+      return title.includes(query) || author.includes(query);
+    });
+    boardItemsCount.textContent = `${filtered.length} of ${pool.length.toLocaleString()} found`;
+  } else {
+    boardItemsCount.textContent = `${pool.length.toLocaleString()} Items`;
+  }
+
   leaderboardList.innerHTML = "";
 
-  const maxElo = items[0].elo || 1200;
-  const minElo = items[items.length - 1].elo || 1000;
+  if (filtered.length === 0) {
+    leaderboardList.innerHTML = `<div class="feed-empty">No items matching "${query}"</div>`;
+    return;
+  }
+
+  const maxElo = pool[0].elo || 1200;
+  const minElo = pool[pool.length - 1].elo || 1000;
   const spread = Math.max(1, maxElo - minElo);
 
-  items.forEach((item, index) => {
-    const rank = index + 1;
-    const rankClass = rank === 1 ? "rank-1" : rank === 2 ? "rank-2" : rank === 3 ? "rank-3" : "";
-    const rankLabel = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `#${rank}`;
+  // Render up to 100 items smoothly
+  filtered.slice(0, 100).forEach((item) => {
+    // Ground-truth global rank in pool
+    const globalRank = pool.findIndex((p) => p.id === item.id) + 1;
+    const rankLabel = globalRank === 1 ? "🥇" : globalRank === 2 ? "🥈" : globalRank === 3 ? "🥉" : `#${globalRank}`;
+    const rankClass = globalRank === 1 ? "rank-1" : globalRank === 2 ? "rank-2" : globalRank === 3 ? "rank-3" : "";
     const percent = Math.max(8, Math.min(100, ((item.elo - minElo) / spread) * 100));
+
+    let authorStr = "";
+    try {
+      if (typeof item.metadata === "string") {
+        const meta = JSON.parse(item.metadata);
+        if (meta.author) authorStr = ` • ${meta.author}`;
+      } else if (item.metadata && item.metadata.author) {
+        authorStr = ` • ${item.metadata.author}`;
+      }
+    } catch (e) {}
 
     const row = document.createElement("div");
     row.className = `board-row ${rankClass}`;
@@ -385,13 +447,13 @@ function renderLeaderboard(items) {
       <div class="row-rank">${rankLabel}</div>
       <div class="row-info">
         <div class="row-title" title="${item.title}">${item.title}</div>
+        <div class="row-sub">${item.wins}W - ${item.losses}L (${item.matches_count}M)${authorStr}</div>
         <div class="row-bar-wrap">
           <div class="row-bar" style="width: ${percent}%"></div>
         </div>
       </div>
       <div class="row-stats">
         <div class="row-elo">${item.elo.toFixed(1)}</div>
-        <div class="row-record">${item.wins}W - ${item.losses}L (${item.matches_count}M)</div>
       </div>
     `;
     leaderboardList.appendChild(row);
