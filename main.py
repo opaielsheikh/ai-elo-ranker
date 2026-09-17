@@ -38,15 +38,16 @@ def get_domain_prompt_and_criteria(dataset_name: str) -> tuple[str, dict[str, st
     
     if "poem" in name_lower:
         instructions = (
-            "You are an elite literary critic. Compare Candidate A and Candidate B on imagery, "
-            "rhythm, evocative power, poetic diction, and emotional resonance. Declare the superior poem."
+            "You are an elite literary critic. Evaluate Candidate A and Candidate B. "
+            "Which poem from these two is better by musicality, rhyme, and meaning? "
+            "Declare the superior poem based on its lyrical musicality, rhyme craft, and profound thematic meaning."
         )
         criteria = {
-            "imagery_and_metaphor": "Vivid, original imagery and powerful metaphorical depth",
-            "meter_and_cadence": "Superior rhythmic flow, meter, and lyrical musicality",
-            "emotional_resonance": "Profound emotional impact and psychological resonance",
-            "originality_of_voice": "Distinctive, daring, and authentic poetic voice",
-            "structural_craft": "Masterful economy of language and formal structure"
+            "musicality_and_cadence": "Superior lyrical musicality, melodic cadence, and auditory flow",
+            "rhyme_and_craft": "Masterful rhyme scheme, metrical precision, and formal craft",
+            "thematic_meaning": "Profound philosophical meaning, emotional depth, and substance",
+            "imagery_and_metaphor": "Vivid metaphorical imagery, symbolism, and evocative power",
+            "originality_and_voice": "Distinctive poetic voice and unforgettable resonance"
         }
     elif "pitch" in name_lower or "startup" in name_lower:
         instructions = (
