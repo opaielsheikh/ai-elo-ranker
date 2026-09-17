@@ -1,0 +1,2 @@
+typesafe-sdk>=0.6.0
+python-dotenv>=1.0.0

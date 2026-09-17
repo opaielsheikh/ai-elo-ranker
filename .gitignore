@@ -1,0 +1,46 @@
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# SQLite databases
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+elo_tournament.db
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache & build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# macOS metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+._*

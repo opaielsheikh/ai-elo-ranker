@@ -1,0 +1,74 @@
+[
+  {
+    "id": "poem_01",
+    "title": "Do Not Go Gentle into That Good Night",
+    "content": "Do not go gentle into that good night,\nOld age should burn and rave at close of day;\nRage, rage against the dying of the light.\n\nThough wise men at their end know dark is right,\nBecause their words had forked no lightning they\nDo not go gentle into that good night.",
+    "metadata": {"author": "Dylan Thomas", "year": 1951}
+  },
+  {
+    "id": "poem_02",
+    "title": "The Road Not Taken",
+    "content": "Two roads diverged in a yellow wood,\nAnd sorry I could not travel both\nAnd be one traveler, long I stood\nAnd looked down one as far as I could\nTo where it bent in the undergrowth;\n\nI took the one less traveled by,\nAnd that has made all the difference.",
+    "metadata": {"author": "Robert Frost", "year": 1916}
+  },
+  {
+    "id": "poem_03",
+    "title": "Ozymandias",
+    "content": "I met a traveller from an antique land,\nWho said—'Two vast and trunkless legs of stone\nStand in the desert. . . . Near them, on the sand,\nHalf sunk a shattered visage lies, whose frown,\nAnd wrinkled lip, and sneer of cold command,\nTell that its sculptor well those passions read.'\n'My name is Ozymandias, King of Kings;\nLook on my Works, ye Mighty, and despair!'",
+    "metadata": {"author": "Percy Bysshe Shelley", "year": 1818}
+  },
+  {
+    "id": "poem_04",
+    "title": "The Raven (Opening)",
+    "content": "Once upon a midnight dreary, while I pondered, weak and weary,\nOver many a quaint and curious volume of forgotten lore—\nWhile I nodded, nearly napping, suddenly there came a tapping,\nAs of some one gently rapping, rapping at my chamber door.\n'’Tis some visitor,' I muttered, 'tapping at my chamber door—\nOnly this and nothing more.'",
+    "metadata": {"author": "Edgar Allan Poe", "year": 1845}
+  },
+  {
+    "id": "poem_05",
+    "title": "Sonnet 18",
+    "content": "Shall I compare thee to a summer's day?\nThou art more lovely and more temperate:\nRough winds do shake the darling buds of May,\nAnd summer's lease hath all too short a date;\nSometime too hot the eye of heaven shines,\nAnd often is his gold complexion dimm'd;\nSo long as men can breathe or eyes can see,\nSo long lives this, and this gives life to thee.",
+    "metadata": {"author": "William Shakespeare", "year": 1609}
+  },
+  {
+    "id": "poem_06",
+    "title": "Hope is the thing with feathers",
+    "content": "'Hope' is the thing with feathers -\nThat perches in the soul -\nAnd sings the tune without the words -\nAnd never stops - at all -\n\nAnd sweetest - in the Gale - is heard -\nAnd sore must be the storm -\nThat could abash the little Bird\nThat kept so many warm -",
+    "metadata": {"author": "Emily Dickinson", "year": 1891}
+  },
+  {
+    "id": "poem_07",
+    "title": "Still I Rise",
+    "content": "You may write me down in history\nWith your bitter, twisted lies,\nYou may trod me in the very dirt\nBut still, like dust, I'll rise.\n\nDoes my sassiness upset you?\nWhy are you beset with gloom?\n’Cause I walk like I've got oil wells\nPumping in my living room.",
+    "metadata": {"author": "Maya Angelou", "year": 1978}
+  },
+  {
+    "id": "poem_08",
+    "title": "Fire and Ice",
+    "content": "Some say the world will end in fire,\nSome say in ice.\nFrom what I’ve tasted of desire\nI hold with those who favor fire.\nBut if it had to perish twice,\nI think I know enough of hate\nTo say that for destruction ice\nIs also great\nAnd would suffice.",
+    "metadata": {"author": "Robert Frost", "year": 1920}
+  },
+  {
+    "id": "poem_09",
+    "title": "Jabberwocky",
+    "content": "’Twas brillig, and the slithy toves\nDid gyre and gimble in the wabe:\nAll mimsy were the borogoves,\nAnd the mome raths outgrabe.\n\n'Beware the Jabberwock, my son!\nThe jaws that bite, the claws that catch!\nBeware the Jubjub bird, and shun\nThe frumious Bandersnatch!'",
+    "metadata": {"author": "Lewis Carroll", "year": 1871}
+  },
+  {
+    "id": "poem_10",
+    "title": "She Walks in Beauty",
+    "content": "She walks in beauty, like the night\nOf cloudless climes and starry skies;\nAnd all that's best of dark and bright\nMeet in her aspect and her eyes;\nThus mellowed to that tender light\nWhich heaven to gaudy day denies.",
+    "metadata": {"author": "Lord Byron", "year": 1814}
+  },
+  {
+    "id": "poem_11",
+    "title": "Invictus",
+    "content": "Out of the night that covers me,\nBlack as the pit from pole to pole,\nI thank whatever gods may be\nFor my unconquerable soul.\n\nIn the fell clutch of circumstance\nI have not winced nor cried aloud.\nUnder the bludgeonings of chance\nMy head is bloody, but unbowed.\n\nI am the master of my fate,\nI am the captain of my soul.",
+    "metadata": {"author": "William Ernest Henley", "year": 1888}
+  },
+  {
+    "id": "poem_12",
+    "title": "We Real Cool",
+    "content": "THE POOL PLAYERS.\nSEVEN AT THE GOLDEN SHOVEL.\n\nWe real cool. We\nLeft school. We\n\nLurk late. We\nStrike straight. We\n\nSing sin. We\nThin gin. We\n\nJazz June. We\nDie soon.",
+    "metadata": {"author": "Gwendolyn Brooks", "year": 1960}
+  }
+]

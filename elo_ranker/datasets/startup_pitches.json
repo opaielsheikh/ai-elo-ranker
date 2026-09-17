@@ -1,0 +1,74 @@
+[
+  {
+    "id": "pitch_01",
+    "title": "Airbnb (AirBed & Breakfast)",
+    "content": "Book rooms with locals, rather than hotels. Price is the #1 concern for customers booking travel online. Hotels leave you disconnected from the city and its culture. No easy way exists to book a room with a local or become a host. We provide a web platform where users can publish, offer, and book short-term accommodation worldwide.",
+    "metadata": {"company": "Airbnb", "year": 2008}
+  },
+  {
+    "id": "pitch_02",
+    "title": "UberCab (Next-Gen Car Service)",
+    "content": "Fast, reliable car service on demand. Traditional cabs use aging 20th-century technology: hail on street or call dispatcher with 45-min wait times. UberCab is a 1-click car service ordered via iPhone app or SMS, with GPS-tracked pickups in under 5 minutes, cashless automatic billing, and luxury chauffeured experience at predictable rates.",
+    "metadata": {"company": "Uber", "year": 2008}
+  },
+  {
+    "id": "pitch_03",
+    "title": "Dropbox",
+    "content": "Storage has become fragmented across laptops, desktops, and phones. Emailing files to yourself is painful and USB drives get lost. Dropbox seamlessly synchronizes your files across all your computers and mobile devices automatically in background, using clean native folders that simply work without any complex configuration.",
+    "metadata": {"company": "Dropbox", "year": 2007}
+  },
+  {
+    "id": "pitch_04",
+    "title": "Stripe",
+    "content": "Accepting payments online currently requires merchant accounts, weeks of paperwork, clunky gateway redirects, and high setup fees. Stripe replaces weeks of bureaucracy with 7 lines of code. Developers can integrate credit card processing directly into their app in minutes, with instant onboarding and beautiful developer-first APIs.",
+    "metadata": {"company": "Stripe", "year": 2011}
+  },
+  {
+    "id": "pitch_05",
+    "title": "SpaceX",
+    "content": "The cost of space launch has remained stagnant for 40 years due to expendable rockets and cost-plus government contracting. SpaceX is developing the world's first fully reusable rocket architecture, vertically integrating manufacturing to reduce launch costs by 90% and ultimately make humanity a multi-planetary species.",
+    "metadata": {"company": "SpaceX", "year": 2002}
+  },
+  {
+    "id": "pitch_06",
+    "title": "Slack",
+    "content": "Internal workplace communication is drowning in siloed email threads, lost attachments, and fragmented chat tools. Slack provides searchable team communication: persistent channels organized by project, unified integrations with GitHub, Google Drive, and Jira, and instant searchable archives of all team institutional knowledge.",
+    "metadata": {"company": "Slack", "year": 2013}
+  },
+  {
+    "id": "pitch_07",
+    "title": "Figma",
+    "content": "Design software is trapped on offline desktop apps (Photoshop, Sketch), forcing teams into painful file versioning like 'design_v3_final_final.psd' and slow mock export handoffs. Figma is the first professional interface design tool that runs entirely in the browser with real-time multiplayer collaboration, like Google Docs for design.",
+    "metadata": {"company": "Figma", "year": 2015}
+  },
+  {
+    "id": "pitch_08",
+    "title": "YouTube",
+    "content": "Sharing video on the web is broken. Video files are too large for email, require conflicting proprietary plugins (Windows Media Player, QuickTime, RealPlayer), and hosting bandwidth is prohibitively expensive. YouTube solves this by encoding any video format instantly into ubiquitous Flash video playable in any browser with 1 click.",
+    "metadata": {"company": "YouTube", "year": 2005}
+  },
+  {
+    "id": "pitch_09",
+    "title": "Shopify",
+    "content": "Setting up an online store requires hiring expensive agencies, managing complex server infrastructure, and stitching together database carts. Shopify gives any merchant or entrepreneur a turn-key ecommerce storefront with built-in hosting, templates, inventory management, and payment processing for a low monthly fee.",
+    "metadata": {"company": "Shopify", "year": 2006}
+  },
+  {
+    "id": "pitch_10",
+    "title": "Coinbase",
+    "content": "Bitcoin offers revolutionary decentralized digital currency, but buying or storing it requires running complex command-line daemon nodes, manually compiling open source clients, and risking private key loss. Coinbase is the PayPal for Bitcoin: a simple consumer wallet allowing anyone to buy, sell, and store crypto securely with a bank account.",
+    "metadata": {"company": "Coinbase", "year": 2012}
+  },
+  {
+    "id": "pitch_11",
+    "title": "Substack",
+    "content": "Digital journalism and blogging are held hostage by ad-supported clickbait models, algorithmic social media distribution, and declining subscription revenues. Substack provides independent writers with a direct-to-reader publishing platform combining email newsletters with paid subscription paywalls and zero platform lock-in.",
+    "metadata": {"company": "Substack", "year": 2017}
+  },
+  {
+    "id": "pitch_12",
+    "title": "Notion",
+    "content": "Modern knowledge workers juggle dozens of fragmented apps: Google Docs for notes, Trello for tasks, Confluence for wikis, and Airtable for databases. Notion unifies your entire workspace into a modular, Lego-like document interface where any text block can transform into a task list, database, kanban board, or relational table.",
+    "metadata": {"company": "Notion", "year": 2016}
+  }
+]
