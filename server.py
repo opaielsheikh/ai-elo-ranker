@@ -5,10 +5,8 @@ import sys
 # Automatically re-execute inside the project's .venv if running with system python
 _venv_python = os.path.abspath(os.path.join(os.path.dirname(__file__), ".venv", "bin", "python"))
 if os.path.exists(_venv_python) and sys.executable != _venv_python:
-    try:
-        import fastapi
-    except ImportError:
-        os.execv(_venv_python, [_venv_python] + sys.argv)
+    os.execv(_venv_python, [_venv_python] + sys.argv)
+
 
 import json
 import asyncio
@@ -25,12 +23,11 @@ load_dotenv()
 
 from elo_ranker.config import Config
 from elo_ranker.db import Database
-from elo_ranker.judge import JevJudge
 from elo_ranker.matchmaker import SwissMatchmaker
 from elo_ranker.engine import TournamentEngine
-from main import load_dataset, get_domain_prompt_and_criteria
+from main import load_dataset, get_domain_prompt_and_criteria, build_judge
 
-app = FastAPI(title="⚡ AI Elo Ranker Live Dashboard")
+app = FastAPI(title="⚡ AI Elo & TrueSkill Ranker Live Dashboard")
 
 # WebSocket connection manager
 class ConnectionManager:
@@ -64,6 +61,8 @@ active_tournament_task: Optional[asyncio.Task] = None
 current_tournament_state = {
     "is_running": False,
     "dataset": None,
+    "mode": "elo",
+    "judge_type": "jev",
     "current_round": 0,
     "matches_played": 0,
     "stats": {}
@@ -71,10 +70,15 @@ current_tournament_state = {
 
 class StartTournamentRequest(BaseModel):
     dataset: str = "startup_pitches.json"
+    mode: str = "elo"  # "elo" or "trueskill"
+    cohort_size: int = 3  # for trueskill
+    judge_type: str = "jev"  # "jev", "local", "ensemble", "mock"
+    local_url: str = "http://localhost:11434/v1"
+    local_model: str = "qwen2.5:7b"
     concurrency: int = 8
     rounds: int = 6
     threshold: float = 0.4
-    reset_db: bool = False  # Keep history by default!
+    reset_db: bool = False
     api_key: Optional[str] = None
 
 @app.get("/api/datasets")
@@ -101,6 +105,8 @@ async def get_status():
     return {
         "is_running": current_tournament_state["is_running"],
         "dataset": current_tournament_state["dataset"],
+        "mode": current_tournament_state["mode"],
+        "judge_type": current_tournament_state["judge_type"],
         "stats": db.get_tournament_stats(),
         "leaderboard": db.get_leaderboard(limit=25),
         "recent_matches": db.get_match_history(limit=30)
@@ -109,16 +115,20 @@ async def get_status():
 async def _run_tournament_job(req: StartTournamentRequest):
     global current_tournament_state
     try:
-        # Determine API key: prefer user-supplied key, fallback to server environment
+        # Determine API key for Jev / TypeSafe
         api_key = (req.api_key or "").strip() or os.getenv("TYPESAFE_API_KEY", "")
-        if not api_key:
+
+        # If user picked Jev but no key is provided, alert or fallback
+        if req.judge_type == "jev" and not api_key:
             await manager.broadcast("tournament_error", {
-                "error": "No TypeSafe API Key provided. Please enter your Jev API key in the dashboard."
+                "error": "No TypeSafe API Key provided. Please enter your Jev API key, or switch to 'Local Model (Ollama/vLLM)' or 'Mock Judge'."
             })
             return
 
         current_tournament_state["is_running"] = True
         current_tournament_state["dataset"] = req.dataset
+        current_tournament_state["mode"] = req.mode
+        current_tournament_state["judge_type"] = req.judge_type
 
         dataset_path = f"elo_ranker/datasets/{req.dataset}"
         dataset_name, items = load_dataset(dataset_path)
@@ -127,6 +137,11 @@ async def _run_tournament_job(req: StartTournamentRequest):
         config = Config(
             api_key=api_key,
             model=os.getenv("TYPESAFE_MODEL", "jev-latest"),
+            judge_type=req.judge_type,
+            local_base_url=req.local_url,
+            local_model=req.local_model,
+            rating_mode=req.mode,
+            cohort_size=req.cohort_size,
             db_path="elo_tournament.db",
             concurrency=req.concurrency,
             max_rounds=req.rounds,
@@ -135,12 +150,16 @@ async def _run_tournament_job(req: StartTournamentRequest):
         )
 
         db = Database(config.db_path)
-        judge = JevJudge(
+        judge = build_judge(
+            judge_type=req.judge_type,
             api_key=config.api_key,
             model=config.model,
+            local_url=config.local_base_url,
+            local_model=config.local_model,
             instructions=instructions,
-            domain_criteria=criteria
+            criteria=criteria
         )
+
         matchmaker = SwissMatchmaker(
             stability_threshold=config.convergence_stability_threshold,
             min_rounds=config.min_rounds,
@@ -177,7 +196,12 @@ async def start_tournament(req: StartTournamentRequest):
         return JSONResponse(status_code=400, content={"error": "A tournament is already in progress"})
 
     active_tournament_task = asyncio.create_task(_run_tournament_job(req))
-    return {"status": "started", "dataset": req.dataset}
+    return {
+        "status": "started",
+        "dataset": req.dataset,
+        "mode": req.mode,
+        "judge_type": req.judge_type
+    }
 
 @app.post("/api/tournament/stop")
 async def stop_tournament():
@@ -198,6 +222,8 @@ async def websocket_endpoint(websocket: WebSocket):
         "data": {
             "is_running": current_tournament_state["is_running"],
             "dataset": current_tournament_state["dataset"],
+            "mode": current_tournament_state["mode"],
+            "judge_type": current_tournament_state["judge_type"],
             "stats": db.get_tournament_stats(),
             "leaderboard": db.get_leaderboard(limit=50),
             "recent_matches": db.get_match_history(limit=35)
@@ -219,5 +245,5 @@ async def serve_index():
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", "8000"))
-    print(f"\n🚀 AI Elo Ranker Live Dashboard running at http://localhost:{port}\n")
+    print(f"\n🚀 AI Elo & TrueSkill Live Dashboard running at http://localhost:{port}\n")
     uvicorn.run("server:app", host="0.0.0.0", port=port, reload=False)

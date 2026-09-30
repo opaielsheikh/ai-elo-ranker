@@ -1,6 +1,7 @@
-# ⚡ AI Elo Ranker (Powered by Jev & Swiss Matchmaking)
+# ⚡ AI Elo & TrueSkill Ranker (Jev, Open-Weight Models & Bayesian Swiss Matchmaking)
 
-A blazing-fast, recursive tournament engine for ranking texts (poems, startup pitches, rap lyrics, cold emails, ad hooks) using Jev LLM, standard Elo rating mechanics, and real-time WebSocket streaming.
+A blazing-fast, recursive tournament engine for ranking texts (poems, startup pitches, rap lyrics, cold emails, ad hooks) using **Jev LLM**, **local open-weight models (Qwen 2.5, Gemma 2, OpenJev, Laya)**, **TrueSkill / OpenSkill multi-player Bayesian ratings**, standard **Elo mechanics**, and real-time WebSocket streaming.
+
 
 Designed for high-throughput concurrency, cinematic live demos on X (Twitter), and web-based interactive exploration.
 
@@ -73,24 +74,37 @@ Designed for high-throughput concurrency, cinematic live demos on X (Twitter), a
 5. **Instant Cloudflare Public Deployment**:
    - Out-of-the-box support for zero-config public HTTPS streaming via Cloudflare Tunnels, allowing followers on X to watch live on mobile or desktop.
 
+6. **Multi-Player TrueSkill / OpenSkill Bayesian Engine**:
+   - In addition to standard 1v1 Elo, the engine supports $N$-candidate cohorts (e.g., 3 or 4 candidates evaluated simultaneously in one prompt).
+   - Powered by the Plackett-Luce model (`openskill`), tracking skill mean ($\mu$) and uncertainty ($\sigma$) for exponentially faster convergence with significantly fewer LLM API calls.
+
+7. **Pluggable Open-Weight Models & Committee Ensembles**:
+   - Run tournaments 100% locally with open-weight models (**Qwen 2.5**, **Gemma 2**, **OpenJev**, **Laya**) via Ollama, vLLM, or LM Studio without API limits.
+   - Use an **Ensemble Committee Judge** to aggregate verdicts across multiple models via majority voting (1v1) or Borda count (multi-way) to eliminate single-model bias.
+   - Includes a deterministic offline **Mock Judge** for instant zero-cost testing and simulation.
+
+
 ---
 
 ## 📂 Project Structure
 
 ```
 .
-├── server.py                # FastAPI WebSocket server streaming duels to the web UI
-├── main.py                  # CLI tournament runner with auto-venv detection
+├── server.py                # FastAPI WebSocket server streaming duels & cohorts to the web UI
+├── main.py                  # CLI tournament runner supporting Elo & TrueSkill with auto-venv
 ├── elo_tournament.db        # SQLite database in WAL mode (auto-created)
+├── pytest.ini               # Pytest configuration with asyncio support
+├── tests/                   # Full test suite (27 unit & integration tests)
 ├── static/
 │   ├── index.html           # High-tech glassmorphism dashboard UI
-│   ├── styles.css           # Modern cyber styling with micro-animations
+│   ├── styles.css           # Modern cyber styling with micro-animations & multi-card cohorts
 │   └── app.js               # WebSocket client, sound synthesizer, and live DOM updates
 ├── elo_ranker/
 │   ├── elo.py               # Pure math: Expected scores, dynamic K-factor, rating deltas
-│   ├── judge.py             # Async Jev wrapper with position bias mitigation & retries
-│   ├── matchmaker.py        # Swiss-system pairing & rank convergence evaluator
-│   ├── db.py                # SQLite schema, match logs, and leaderboard queries
+│   ├── trueskill_engine.py  # Bayesian TrueSkill/OpenSkill engine with Plackett-Luce model
+│   ├── judge.py             # Modular judges: JevJudge, OpenAICompatibleJudge, Ensemble, Mock
+│   ├── matchmaker.py        # Swiss-system 1v1 pairings & multi-candidate cohort generator
+│   ├── db.py                # SQLite schema supporting both Elo & TrueSkill mu/sigma tracking
 │   ├── engine.py            # Asyncio tournament orchestrator with worker pools
 │   ├── reporter.py          # Terminal visual renderer with ANSI colors & progress bars
 │   ├── config.py            # Environment settings and defaults
@@ -106,7 +120,7 @@ Designed for high-throughput concurrency, cinematic live demos on X (Twitter), a
 ## ⚡ Quick Start
 
 ### 1. Set Your Environment
-Ensure your `.env` contains your TypeSafe API credentials:
+Ensure your `.env` contains your TypeSafe API credentials (optional if using local models or mock judge):
 ```env
 TYPESAFE_API_KEY=your_key_here
 TYPESAFE_MODEL=jev-latest
@@ -117,27 +131,33 @@ Start the local server (runs automatically inside `.venv`):
 ```bash
 python3 server.py
 ```
-Open **[http://localhost:8000](http://localhost:8000)** in your browser, pick a dataset, and click **START TOURNAMENT**!
+Open **[http://localhost:8000](http://localhost:8000)** in your browser:
+* Choose **Rating Engine**: `Elo (1v1 Swiss)` or `TrueSkill (Multi-player)`
+* Choose **Cohort Size**: 3 or 4 candidates
+* Choose **Judge Backend**: `Jev (TypeSafe)`, `Local / Open-Weight (Ollama/vLLM)`, `Ensemble Committee`, or `Mock Judge`
+* Click **START TOURNAMENT**!
 
 ### 3. Deploy Live Online (Public HTTPS)
 Share your tournament with followers on X in real time:
 ```bash
 cloudflared tunnel --url http://localhost:8000
 ```
-This generates a secure public HTTPS URL (e.g., `https://your-name.trycloudflare.com`).
 
 ### 4. Run via Terminal CLI
-If you prefer running directly in the shell with real-time ANSI terminal logging:
 ```bash
-# Run 10,000 Poems Tournament (16 parallel workers)
+# Run TrueSkill 3-candidate tournament with Jev
+python3 main.py --mode trueskill --cohort-size 3 --judge jev --dataset elo_ranker/datasets/startup_pitches.json --rounds 3
+
+# Run local open-weight model via Ollama (Qwen 2.5, Gemma 2, etc.)
+python3 main.py --mode trueskill --cohort-size 3 --judge local --local-model qwen2.5:0.5b --dataset elo_ranker/datasets/startup_pitches.json
+
+# Run 10,000 Poems Championship with Elo (16 parallel workers)
 python3 main.py --dataset elo_ranker/datasets/famous_poems_10k.json --concurrency 16 --rounds 6
 
-# Run The Curator's Cycle (17-part sequence)
-python3 main.py --dataset elo_ranker/datasets/curator_cycle.json --concurrency 8 --rounds 4
-
-# Run Startup Pitches
-python3 main.py --dataset elo_ranker/datasets/startup_pitches.json --concurrency 8 --rounds 6
+# Run test suite
+pytest -v
 ```
+
 
 ---
 

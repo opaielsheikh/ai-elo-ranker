@@ -61,6 +61,27 @@ class TerminalReporter:
         print(f" {match_tag} {time_tag} {vs_str}")
         print(f"    ↳ {winner_str} | {reason_str}")
 
+    def log_cohort_match(
+        self,
+        match_idx: int,
+        round_num: int,
+        cohort: List[Dict[str, Any]],
+        results: List[Dict[str, Any]],
+        winner_id: str,
+        reason: str,
+        latency_ms: float
+    ) -> None:
+        titles_by_id = {str(it["id"]): it.get("title", f"Item {it['id']}")[:20] for it in cohort}
+        winner_title = titles_by_id.get(winner_id, "Winner")
+
+        time_tag = f"{Colors.DIM}[{latency_ms:.0f}ms]{Colors.RESET}"
+        match_tag = f"{Colors.CYAN}[TrueSkill R{round_num} #{match_idx}]{Colors.RESET}"
+        
+        ranks_str = ", ".join([f"#{r['rank']} {titles_by_id.get(r['id'], r['id'])} (μ:{r['new_mu']:.1f})" for r in results])
+        print(f" {match_tag} {time_tag} Cohort ({len(cohort)} items): {ranks_str}")
+        print(f"    ↳ {Colors.GREEN}Winner: {winner_title}{Colors.RESET} | {Colors.DIM}Rationale: \"{reason}\"{Colors.RESET}")
+
+
     def print_leaderboard(self, items: List[Dict[str, Any]], title: str = "CURRENT LEADERBOARD", limit: int = 10) -> None:
         print(f"\n{Colors.CYAN}{Colors.BOLD}─── {title} ───────────────────────────────────────────────────{Colors.RESET}")
         print(f"{Colors.BOLD}{'Rank':<5} {'Title':<35} {'Elo':<8} {'W - L - T':<12} {'Matches':<8} {'Bar'}{Colors.RESET}")

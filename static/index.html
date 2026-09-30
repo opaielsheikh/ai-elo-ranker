@@ -80,6 +80,55 @@
           </label>
         </div>
 
+        <!-- Engine & Judge Selection Row -->
+        <div class="engine-select-row">
+          <div class="control-group">
+            <label for="modeSelect">Rating Engine</label>
+            <select id="modeSelect" class="custom-select">
+              <option value="elo" selected>⚔️ Elo System (1v1 Swiss)</option>
+              <option value="trueskill">🎯 TrueSkill / OpenSkill (Multi-Player)</option>
+            </select>
+          </div>
+
+          <div class="control-group" id="cohortGroup" style="display: none;">
+            <label for="cohortSizeSelect">Cohort Size</label>
+            <select id="cohortSizeSelect" class="custom-select">
+              <option value="3" selected>3 Candidates / Cohort</option>
+              <option value="4">4 Candidates / Cohort</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="judgeSelect">Judge Backend</label>
+            <select id="judgeSelect" class="custom-select">
+              <option value="jev" selected>⚡ Jev System One (TypeSafe API)</option>
+              <option value="local">💻 Local / Open-Weight (Ollama / vLLM)</option>
+              <option value="ensemble">🤝 Ensemble Committee (Consensus)</option>
+              <option value="mock">🧪 Simulated / Mock Judge (Offline)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Local Model URL & Name Row (Toggleable) -->
+        <div class="local-model-row" id="localModelRow" style="display: none;">
+          <div class="local-input-group">
+            <label for="inputLocalUrl">Local API Endpoint</label>
+            <input type="text" id="inputLocalUrl" class="custom-input" value="http://localhost:11434/v1" placeholder="http://localhost:11434/v1">
+          </div>
+          <div class="local-input-group">
+            <label for="inputLocalModel">Local Model Name</label>
+            <input type="text" id="inputLocalModel" class="custom-input" list="modelSuggestions" value="qwen2.5:7b" placeholder="qwen2.5:7b, gemma2:9b, openjev, laya">
+            <datalist id="modelSuggestions">
+              <option value="qwen2.5:7b">
+              <option value="gemma2:9b">
+              <option value="openjev">
+              <option value="laya">
+              <option value="llama3.1:8b">
+              <option value="deepseek-r1:8b">
+            </datalist>
+          </div>
+        </div>
+
         <div class="control-row">
           <div class="control-group">
             <label for="datasetSelect">Dataset</label>
@@ -105,12 +154,16 @@
             <button id="btnStart" class="btn btn-primary">
               <span class="btn-icon">⚡</span> START TOURNAMENT
             </button>
+            <button id="btnStop" class="btn btn-secondary" style="display: none;" title="Stop Tournament">
+              ⏹ STOP
+            </button>
             <button id="btnSound" class="btn btn-icon-only" title="Toggle Sound">
               🔊
             </button>
           </div>
         </div>
       </div>
+
 
       <!-- Live Duel Arena -->
       <div class="glass-card arena-card">
